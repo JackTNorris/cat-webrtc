@@ -4,7 +4,12 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 
 const firebaseConfig = {
-  // your config
+  apiKey: "AIzaSyA-M8mIeugRVIlY3FRGQpm0hg6vouwELp0",
+  authDomain: "cat-webrtc.firebaseapp.com",
+  projectId: "cat-webrtc",
+  storageBucket: "cat-webrtc.firebasestorage.app",
+  messagingSenderId: "416637700614",
+  appId: "1:416637700614:web:5d76d45b6a530fecb89187"
 };
 
 if (!firebase.apps.length) {
@@ -36,30 +41,46 @@ const remoteVideo = document.getElementById('remoteVideo');
 const hangupButton = document.getElementById('hangupButton');
 
 // 1. Setup media sources
-
 webcamButton.onclick = async () => {
-  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-  remoteStream = new MediaStream();
+  // Ask for user's permission
+  const permissionGranted = confirm("Do you allow access to your webcam?");
+  
+  if (!permissionGranted) {
+    alert("Permission denied. Webcam access is required to proceed.");
+    return;
+  }
 
-  // Push tracks from local stream to peer connection
-  localStream.getTracks().forEach((track) => {
-    pc.addTrack(track, localStream);
-  });
+  try {
+    // Access the webcam
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    remoteStream = new MediaStream();
 
-  // Pull tracks from remote stream, add to video stream
-  pc.ontrack = (event) => {
-    event.streams[0].getTracks().forEach((track) => {
-      remoteStream.addTrack(track);
+    // Push tracks from local stream to peer connection
+    localStream.getTracks().forEach((track) => {
+      pc.addTrack(track, localStream);
     });
-  };
 
-  webcamVideo.srcObject = localStream;
-  remoteVideo.srcObject = remoteStream;
+    // Pull tracks from remote stream, add to video stream
+    pc.ontrack = (event) => {
+      event.streams[0].getTracks().forEach((track) => {
+        remoteStream.addTrack(track);
+      });
+    };
 
-  callButton.disabled = false;
-  answerButton.disabled = false;
-  webcamButton.disabled = true;
+    // Set video sources
+    webcamVideo.srcObject = localStream;
+    remoteVideo.srcObject = remoteStream;
+
+    // Enable/disable buttons
+    callButton.disabled = false;
+    answerButton.disabled = false;
+    webcamButton.disabled = true;
+  } catch (error) {
+    console.error("Error accessing the webcam:", error);
+    alert(error);
+  }
 };
+
 
 // 2. Create an offer
 callButton.onclick = async () => {
