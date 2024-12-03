@@ -56,7 +56,8 @@ const hangupButton = document.getElementById('hangupButton');
 // WEBCAM SETUP
 try {
   // Access the webcam
-  localStream = await navigator.mediaDevices.getUserMedia({ video: true, facingMode: 'environment' });
+  localStream = await navigator.mediaDevices.getUserMedia({ video: {facingMode: 'environment'} })
+  console.log(await navigator.mediaDevices.enumerateDevices())
   remoteStream = new MediaStream();
 
   // Push tracks from local stream to peer connection
