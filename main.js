@@ -3,6 +3,8 @@ import './style.css';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyA-M8mIeugRVIlY3FRGQpm0hg6vouwELp0",
   authDomain: "cat-webrtc.firebaseapp.com",
@@ -28,6 +30,17 @@ const servers = {
 
 // Global State
 const pc = new RTCPeerConnection(servers);
+
+pc.oniceconnectionstatechange = function() {
+  if(pc.iceConnectionState == 'disconnected') {
+      console.log('Disconnected');
+      window.location.reload()
+  }
+  console.log('Something happened')
+}
+
+
+
 let localStream = null;
 let remoteStream = null;
 
@@ -40,56 +53,49 @@ const answerButton = document.getElementById('answerButton');
 const remoteVideo = document.getElementById('remoteVideo');
 const hangupButton = document.getElementById('hangupButton');
 
-// 1. Setup media sources
-webcamButton.onclick = async () => {
-  // Ask for user's permission
-  const permissionGranted = confirm("Do you allow access to your webcam?");
-  
-  if (!permissionGranted) {
-    alert("Permission denied. Webcam access is required to proceed.");
-    return;
-  }
+// WEBCAM SETUP
+try {
+  // Access the webcam
+  localStream = await navigator.mediaDevices.getUserMedia({ video: true });
+  remoteStream = new MediaStream();
 
-  try {
-    // Access the webcam
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true });
-    remoteStream = new MediaStream();
+  // Push tracks from local stream to peer connection
+  localStream.getTracks().forEach((track) => {
+    pc.addTrack(track, localStream);
+  });
 
-    // Push tracks from local stream to peer connection
-    localStream.getTracks().forEach((track) => {
-      pc.addTrack(track, localStream);
+  // Pull tracks from remote stream, add to video stream
+  pc.ontrack = (event) => {
+    event.streams[0].getTracks().forEach((track) => {
+      remoteStream.addTrack(track);
     });
+  };
 
-    // Pull tracks from remote stream, add to video stream
-    pc.ontrack = (event) => {
-      event.streams[0].getTracks().forEach((track) => {
-        remoteStream.addTrack(track);
-      });
-    };
+  // Set video sources
+  webcamVideo.srcObject = localStream;
+  remoteVideo.srcObject = remoteStream;
 
-    // Set video sources
-    webcamVideo.srcObject = localStream;
-    remoteVideo.srcObject = remoteStream;
+  // Enable/disable buttons
+  //callButton.disabled = false;
+  answerButton.disabled = false;
+  //webcamButton.disabled = true;
+} catch (error) {
+  console.error("Error accessing the webcam:", error);
+  alert(error);
+}
+//////////////////////////////////////////////////////
 
-    // Enable/disable buttons
-    callButton.disabled = false;
-    answerButton.disabled = false;
-    webcamButton.disabled = true;
-  } catch (error) {
-    console.error("Error accessing the webcam:", error);
-    alert(error);
-  }
-};
+// CREATE CALL:
 
-
-// 2. Create an offer
-callButton.onclick = async () => {
+if (document.URL.includes('broadcaster'))
+{
+  console.log('this is the broadcaster')
   // Reference Firestore collections for signaling
-  const callDoc = firestore.collection('calls').doc();
+  const callDoc = firestore.collection('calls').doc('cat-call');
   const offerCandidates = callDoc.collection('offerCandidates');
   const answerCandidates = callDoc.collection('answerCandidates');
 
-  callInput.value = callDoc.id;
+  //callInput.value = callDoc.id;
 
   // Get candidates for caller, save to db
   pc.onicecandidate = (event) => {
@@ -126,42 +132,48 @@ callButton.onclick = async () => {
     });
   });
 
-  hangupButton.disabled = false;
-};
+//
+}
+  
+//////////////////////////////////////////////////////
 
-// 3. Answer the call with the unique ID
-answerButton.onclick = async () => {
-  const callId = callInput.value;
-  const callDoc = firestore.collection('calls').doc(callId);
-  const answerCandidates = callDoc.collection('answerCandidates');
-  const offerCandidates = callDoc.collection('offerCandidates');
 
-  pc.onicecandidate = (event) => {
-    event.candidate && answerCandidates.add(event.candidate.toJSON());
-  };
+if (document.URL.includes('receiver'))
+{
+  // 3. Answer the call with the unique ID
+  answerButton.onclick = async () => {
+    //const callId = callInput.value;
+    const callDoc = firestore.collection('calls').doc('cat-call');
+    const answerCandidates = callDoc.collection('answerCandidates');
+    const offerCandidates = callDoc.collection('offerCandidates');
 
-  const callData = (await callDoc.get()).data();
+    pc.onicecandidate = (event) => {
+      event.candidate && answerCandidates.add(event.candidate.toJSON());
+    };
 
-  const offerDescription = callData.offer;
-  await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+    const callData = (await callDoc.get()).data();
 
-  const answerDescription = await pc.createAnswer();
-  await pc.setLocalDescription(answerDescription);
+    const offerDescription = callData.offer;
+    await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-  const answer = {
-    type: answerDescription.type,
-    sdp: answerDescription.sdp,
-  };
+    const answerDescription = await pc.createAnswer();
+    await pc.setLocalDescription(answerDescription);
 
-  await callDoc.update({ answer });
+    const answer = {
+      type: answerDescription.type,
+      sdp: answerDescription.sdp,
+    };
 
-  offerCandidates.onSnapshot((snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      console.log(change);
-      if (change.type === 'added') {
-        let data = change.doc.data();
-        pc.addIceCandidate(new RTCIceCandidate(data));
-      }
+    await callDoc.update({ answer });
+
+    offerCandidates.onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        console.log(change);
+        if (change.type === 'added') {
+          let data = change.doc.data();
+          pc.addIceCandidate(new RTCIceCandidate(data));
+        }
+      });
     });
-  });
-};
+  };
+}
