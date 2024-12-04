@@ -5,25 +5,36 @@
     <link rel="icon" type="image/svg+xml" href="./assets/favicon-17e50649.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebRTC Demo</title>
-    <script type="module" crossorigin src="./assets/index-35170f4c.js"></script>
+    <script type="module" crossorigin src="./assets/index-2ce34eeb.js"></script>
     <link rel="stylesheet" href="./assets/index-9b5fe71d.css">
   </head>
   <body>
-    <h2>Kitty Cam</h2>
     <div class="videos">
       <span hidden>
         <h3>Local Stream</h3>
         <video id="webcamVideo" autoplay playsinline></video>
       </span>
       <span>
-        <h3>Remote Stream</h3>
+        <div style="display: flex; flex-direction: row;justify-content: center; align-items: center;">
+          <img style="height: 5em;" src="https://media.tenor.com/KOTVUma-gOcAAAAj/confused-cat.gif" />
+          <h1>Kitty Cam</h1>
+          <img style="height: 5em;" src="https://media.tenor.com/KOTVUma-gOcAAAAj/confused-cat.gif" />
+        </div>
         <video id="remoteVideo" autoplay playsinline></video>
       </span>
 
 
     </div>
-    
-    <button id="answerButton" disabled>Answer</button>
+    <div>
+      <div>
+        <p id="signOnNews"></p>
+      </div>
+      <input id="passwordInput" type="text" placeholder="password" />
+      <button id="submitPassword">Sign-In</button>
+      <button id="signout">Signout</button>
+    </div> </br>
+
+    <button id="answerButton" disabled>Tune In</button>
 
     
 
