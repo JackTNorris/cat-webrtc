@@ -7,21 +7,32 @@
     <title>WebRTC Demo</title>
   </head>
   <body>
-    <h2>Kitty Cam</h2>
     <div class="videos">
       <span hidden>
         <h3>Local Stream</h3>
         <video id="webcamVideo" autoplay playsinline></video>
       </span>
       <span>
-        <h3>Remote Stream</h3>
+        <div style="display: flex; flex-direction: row;justify-content: center; align-items: center;">
+          <img style="height: 5em;" src="https://media.tenor.com/KOTVUma-gOcAAAAj/confused-cat.gif" />
+          <h1>Kitty Cam</h1>
+          <img style="height: 5em;" src="https://media.tenor.com/KOTVUma-gOcAAAAj/confused-cat.gif" />
+        </div>
         <video id="remoteVideo" autoplay playsinline></video>
       </span>
 
 
     </div>
-    
-    <button id="answerButton" disabled>Answer</button>
+    <div>
+      <div>
+        <p id="signOnNews"></p>
+      </div>
+      <input id="passwordInput" type="text" placeholder="password" />
+      <button id="submitPassword">Sign-In</button>
+      <button id="signout">Signout</button>
+    </div> </br>
+
+    <button id="answerButton" disabled>Tune In</button>
 
     <script type="module" src="/main.js"></script>
 

@@ -2,7 +2,10 @@ import './style.css';
 
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'firebase/auth';
 
+
+setTimeout(() => {window.location.reload()}, 1000 * 60 * 15)
 
 
 const firebaseConfig = {
@@ -17,8 +20,12 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
-const firestore = firebase.firestore();
 
+const firestore = firebase.firestore();
+const auth = firebase.auth();
+
+let uid = auth.currentUser?.uid;
+console.log("USER ID: ", uid);
 const servers = {
   iceServers: [
     {
@@ -27,6 +34,8 @@ const servers = {
   ],
   iceCandidatePoolSize: 10,
 };
+
+
 
 // Global State
 const pc = new RTCPeerConnection(servers);
@@ -50,8 +59,36 @@ const webcamVideo = document.getElementById('webcamVideo');
 const callButton = document.getElementById('callButton');
 const callInput = document.getElementById('callInput');
 const answerButton = document.getElementById('answerButton');
+const submitPasswordButton = document.getElementById('submitPassword')
+document.getElementById('signout').onclick = async () => await auth.signOut()
+
 const remoteVideo = document.getElementById('remoteVideo');
 const hangupButton = document.getElementById('hangupButton');
+
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    // User is signed in, see docs for a list of available properties
+    // https://firebase.google.com/docs/reference/js/v8/firebase.User
+    uid = user.uid
+    console.log("USER ID: ", uid)
+    // ...
+  } else {
+    // User is signed out
+    // ...
+  }
+});
+
+submitPasswordButton.onclick = async () => {
+  try {
+    await auth.signInWithEmailAndPassword('kitty@gmail.com', document.getElementById('passwordInput').value)
+    document.getElementById('signOnNews').innerHTML = "Noice, logged in bro"
+  }
+  catch(error)
+  {
+    console.log('shit bro')
+    document.getElementById('signOnNews').innerHTML = JSON.parse(error.message).error.message
+  }
+}
 
 // WEBCAM SETUP
 try {
@@ -92,7 +129,7 @@ if (document.URL.includes('broadcaster'))
 {
   console.log('this is the broadcaster')
   // Reference Firestore collections for signaling
-  const callDoc = firestore.collection('calls').doc('cat-call');
+  const callDoc = firestore.collection('calls').doc('s74ceZA9JwMJUR6t1yJA5P3WX3i2');
   const offerCandidates = callDoc.collection('offerCandidates');
   const answerCandidates = callDoc.collection('answerCandidates');
 
@@ -144,7 +181,7 @@ if (document.URL.includes('receiver'))
   // 3. Answer the call with the unique ID
   answerButton.onclick = async () => {
     //const callId = callInput.value;
-    const callDoc = firestore.collection('calls').doc('cat-call');
+    const callDoc = firestore.collection('calls').doc('s74ceZA9JwMJUR6t1yJA5P3WX3i2');
     const answerCandidates = callDoc.collection('answerCandidates');
     const offerCandidates = callDoc.collection('offerCandidates');
 
