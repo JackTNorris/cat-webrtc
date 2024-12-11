@@ -93,7 +93,7 @@ submitPasswordButton.onclick = async () => {
 // WEBCAM SETUP
 try {
   // Access the webcam
-  localStream = await navigator.mediaDevices.getUserMedia({ video: {facingMode: 'environment'}, audio: document.URL.includes('broadcaster') ? false : true })
+  localStream = await navigator.mediaDevices.getUserMedia({ video: {facingMode: 'environment'}, audio: true })
   console.log(await navigator.mediaDevices.enumerateDevices())
   remoteStream = new MediaStream();
 
