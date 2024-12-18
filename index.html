@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon-17e50649.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC Demo</title>
+    <script type="module" crossorigin src="./assets/index-af946cc7.js"></script>
+    <link rel="stylesheet" href="./assets/index-1efab766.css">
+  </head>
+  <body>
+    <div class="videos">
+      <span hidden>
+        <h3>Local Stream</h3>
+        <video id="webcamVideo" autoplay playsinline muted="muted"></video>
+      </span>
+      <span>
+        <div style="display: flex; flex-direction: row;justify-content: center; align-items: center;">
+          <img style="height: 5em;" src="https://media.tenor.com/KOTVUma-gOcAAAAj/confused-cat.gif" />
+          <h1>Kitty Cam</h1>
+          <img style="height: 5em;" src="https://media.tenor.com/KOTVUma-gOcAAAAj/confused-cat.gif" />
+        </div>
+        <video id="remoteVideo" autoplay playsinline></video>
+      </span>
+
+
+    </div>
+    <div>
+      <div>
+        <p id="signOnNews"></p>
+      </div>
+      <input id="passwordInput" type="text" placeholder="password" />
+      <button id="submitPassword">Sign-In</button>
+      <button id="signout">Signout</button>
+    </div> </br>
+
+    <button id="answerButton" disabled>Tune In</button>
+          <!-- Rounded switch -->
+  </br>
+    <div style="padding: 2rem;">
+      <label class="switch">
+        <input type="checkbox" id="room-light">
+        <span class="slider round"></span>
+      </label>
+    </div>
+    
+
+  </body>
+</html>
